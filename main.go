@@ -4,7 +4,6 @@ import (
     "log"
     "net/http"
     "os"
-    "fmt"
     "github.com/gin-gonic/gin"
 )
 
@@ -17,14 +16,14 @@ func main() {
 
     router := gin.New()
     router.Use(gin.Logger())
-    // router.LoadHTMLGlob("templates/*.tmpl.html")
-    // router.Static("/static", "static")
 
-    // router.GET("/", func(c *gin.Context) {
-    //     c.HTML(http.StatusOK, "index.tmpl.html", nil)
-    // })
+    router.GET("/neo/feed", func(c *gin.Context) {
+        c.String(http.StatusOK, "This wiil return Neo feed")
+    })
 
-    fmt.Print("Test net/http library const: " , http.StatusOK)
+    router.GET("/planetary/apod", func(c *gin.Context) {
+        c.String(http.StatusOK, "This wiil return the APOD")
+    })
 
     router.Run(":" + port)
 }
