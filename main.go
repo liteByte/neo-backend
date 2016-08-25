@@ -6,16 +6,14 @@ import (
     "os"
     "github.com/gin-gonic/gin"
     "encoding/json"
-    "fmt"
+    // "fmt"
     "io/ioutil"
+    "strconv"
 )
 
 func main() {
 
-    fmt.Print("Hi!")
-
     port := os.Getenv("PORT")
-    // port = "5000"
 
     if port == "" {
         log.Fatal("$PORT must be set")
@@ -25,7 +23,8 @@ func main() {
     router.Use(gin.Logger())
 
     router.GET("/neo/feed", func(c *gin.Context) {
-        c.String(http.StatusOK, "This will return Neo Feed")
+        NeoFeedJSONArray := getNeoFeedJSON()
+        c.JSON(http.StatusOK, NeoFeedJSONArray)
     })
 
     router.GET("/planetary/apod", func(c *gin.Context) {
@@ -33,21 +32,27 @@ func main() {
         c.JSON(http.StatusOK, ApodJSON)
     })
 
-    // ApodJSON := getApodJSON()
-    // fmt.Printf("JSON body: %v \n JSON type: %t \n", ApodJSON, ApodJSON)
-
     router.Run(":" + port)
 }
 
 type Apod struct {
-    Url string
+    Url string `json:"url"`
 }
 
-func getApodJSON() Apod{
+type NeoFeed struct {
+    Id string `json:"id"`
+    Name string `json:"name"`
+    Size map[string]float64 `json:"size"`
+    Dangerous bool `json:"dangerous"`
+    Velocity float64 `json:"velocity"`
+    Miss_distance float64 `json:"miss_distance"`
+}
+
+func getApodJSON() Apod {
 
     ApodJSON := Apod{}
 
-    resp, err := http.Get("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+    resp, err := http.Get("https://api.nasa.gov/planetary/apod?api_key=BvzqGsSJDYhfXLJ94uiaJDF7NLtrKJGdYW42eORT")
 
     if (err != nil){
         return ApodJSON
@@ -63,4 +68,71 @@ func getApodJSON() Apod{
     }
 
     return ApodJSON
+}
+
+func getNeoFeedJSON() []NeoFeed{
+
+    var neoFeedArray = []NeoFeed{}
+
+    resp, err := http.Get("https://api.nasa.gov/neo/rest/v1/feed?api_key=BvzqGsSJDYhfXLJ94uiaJDF7NLtrKJGdYW42eORT")
+
+    if (err != nil){
+        return neoFeedArray
+    }
+
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+
+    f := feedParser{}
+
+    err = json.Unmarshal(body, &f)
+
+    neoFeedArray = parseNeoFeedJSON(f)
+
+    return neoFeedArray
+}
+
+func parseNeoFeedJSON(f feedParser) []NeoFeed {
+
+    var neoFeedArray = []NeoFeed{}
+
+    for _, neoMapArray := range f.NearEarthObjects {
+        for _, neo := range neoMapArray {
+            neoObj := NeoFeed{}
+            for k, v := range neo.(map[string]interface{}) {
+                switch k {
+                case "neo_reference_id":
+                    neoObj.Id = v.(string)
+                case "name":
+                    neoObj.Name = v.(string)
+                case "is_potentially_hazardous_asteroid":
+                    neoObj.Dangerous = v.(bool)
+                case "estimated_diameter":
+                    size := v.(map[string]interface{})
+                    km := size["kilometers"].(map[string]interface{})
+                    neoObj.Size = map[string]float64{
+                        "min": km["estimated_diameter_min"].(float64),
+                        "max": km["estimated_diameter_max"].(float64),
+                        "avg": (km["estimated_diameter_max"].(float64) + km["estimated_diameter_min"].(float64)) / 2,
+                    }
+                case "close_approach_data":
+                    approach_data := v.([]interface{})
+                    approach_data_v := approach_data[0].(map[string]interface{})
+
+                    velocity := approach_data_v["relative_velocity"].(map[string]interface{})
+                    miss_distance := approach_data_v["miss_distance"].(map[string]interface{})
+
+                    neoObj.Velocity, _ = strconv.ParseFloat((velocity["kilometers_per_hour"].(string)), 64)
+                    neoObj.Miss_distance, _ = strconv.ParseFloat(miss_distance["kilometers"].(string), 64)
+                }
+            }
+            neoFeedArray = append(neoFeedArray, neoObj)
+        }
+    }
+
+    return neoFeedArray
+}
+
+type feedParser struct {
+    NearEarthObjects map[string] []interface{} `json:"near_earth_objects"`
 }
