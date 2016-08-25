@@ -25,12 +25,12 @@ func main() {
     router.Use(gin.Logger())
 
     router.GET("/neo/feed", func(c *gin.Context) {
-        ApodJSON := getApodJSON()
-        c.JSON(http.StatusOK, ApodJSON)
+        c.String(http.StatusOK, "This will return Neo Feed")
     })
 
     router.GET("/planetary/apod", func(c *gin.Context) {
-        c.String(http.StatusOK, "This will return the APOD")
+        ApodJSON := getApodJSON()
+        c.JSON(http.StatusOK, ApodJSON)
     })
 
     // ApodJSON := getApodJSON()
