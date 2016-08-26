@@ -83,6 +83,7 @@ func getNeoFeedJSON(startDate, endDate string) []NeoFeed{
 
     if startDate == "" {
         startDate = currentDate
+        endDate = currentDate
     }
 
     if endDate == "" {
