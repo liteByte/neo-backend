@@ -9,6 +9,7 @@ import (
     // "fmt"
     "io/ioutil"
     "strconv"
+    "time"
 )
 
 func main() {
@@ -23,7 +24,9 @@ func main() {
     router.Use(gin.Logger())
 
     router.GET("/neo/feed", func(c *gin.Context) {
-        NeoFeedJSONArray := getNeoFeedJSON()
+        startDate := c.Query("start_date")
+        endDate := c.Query("end_date")
+        NeoFeedJSONArray := getNeoFeedJSON(startDate, endDate)
         c.JSON(http.StatusOK, NeoFeedJSONArray)
     })
 
@@ -70,11 +73,28 @@ func getApodJSON() Apod {
     return ApodJSON
 }
 
-func getNeoFeedJSON() []NeoFeed{
+func getNeoFeedJSON(startDate, endDate string) []NeoFeed{
 
     var neoFeedArray = []NeoFeed{}
 
-    resp, err := http.Get("https://api.nasa.gov/neo/rest/v1/feed?api_key=BvzqGsSJDYhfXLJ94uiaJDF7NLtrKJGdYW42eORT")
+    // Get current date
+    t := time.Now()
+    currentDate := t.Format("2006-01-02")
+
+    if startDate == "" {
+        startDate = currentDate
+    }
+
+    if endDate == "" {
+        endDate = currentDate
+    }
+
+    neoFeedURL := "https://api.nasa.gov/neo/rest/v1/feed?start_date=" + startDate +
+            "&end_date=" + endDate + "&api_key=BvzqGsSJDYhfXLJ94uiaJDF7NLtrKJGdYW42eORT"
+
+    println(neoFeedURL)
+
+    resp, err := http.Get(neoFeedURL)
 
     if (err != nil){
         return neoFeedArray
