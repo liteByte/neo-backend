@@ -27,11 +27,13 @@ func main() {
         startDate := c.Query("start_date")
         endDate := c.Query("end_date")
         NeoFeedJSONArray := getNeoFeedJSON(startDate, endDate)
+        c.Header("Access-Control-Allow-Origin", "*")
         c.JSON(http.StatusOK, NeoFeedJSONArray)
     })
 
     router.GET("/planetary/apod", func(c *gin.Context) {
         ApodJSON := getApodJSON()
+        c.Header("Access-Control-Allow-Origin", "*")
         c.JSON(http.StatusOK, ApodJSON)
     })
 
