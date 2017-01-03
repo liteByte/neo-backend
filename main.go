@@ -59,7 +59,7 @@ func getApodJSON() Apod {
 
     resp, err := http.Get("https://api.nasa.gov/planetary/apod?api_key=BvzqGsSJDYhfXLJ94uiaJDF7NLtrKJGdYW42eORT")
 
-    if (err != nil){
+    if err != nil {
         return ApodJSON
     }
 
@@ -68,7 +68,7 @@ func getApodJSON() Apod {
 
     err = json.Unmarshal(body, &ApodJSON)
 
-    if (err != nil){
+    if err != nil {
         return ApodJSON
     }
 
@@ -99,7 +99,7 @@ func getNeoFeedJSON(startDate, endDate string) []NeoFeed{
 
     resp, err := http.Get(neoFeedURL)
 
-    if (err != nil){
+    if err != nil {
         return neoFeedArray
     }
 
