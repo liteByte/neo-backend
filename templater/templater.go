@@ -1,7 +1,6 @@
 package templater
 
 import (
-	"strings"
 	"io/ioutil"
 )
 
@@ -12,11 +11,12 @@ func Template(file string, values map[string]string) (string, error) {
 		return "", err
 	}
 
-	result := string(b)
+	result := ""
 
 	state := 0
 	key := ""
 	for _, char := range b {
+		result += string(char)
 		switch state {
 		case 0:
 			if char == '{' {
@@ -40,11 +40,14 @@ func Template(file string, values map[string]string) (string, error) {
 		case 3:
 			if char == '}' {
 				if v, p := values[key]; p {
-					r := strings.NewReplacer("{{" + key + "}}", v)
-					result = r.Replace(result)
+					result = result[:len(result) - len("{{" + key + "}}")] + v
 				}
 			}
-			state = 0
+			if char == '{' {
+				state = 1
+			} else {
+				state = 0
+			}
 			key = ""
 			break
 		}
