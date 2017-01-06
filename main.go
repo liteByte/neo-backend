@@ -9,11 +9,11 @@ import (
 	"io/ioutil"
 	"strconv"
 	"time"
-	"liteByte/neo-backend/validator"
+	"github.com/liteByte/structval"
 )
 
 type Config struct {
-	Port string `default:"3001"`
+	Port     string `default:"3002"`
 	Nasa_key string `required:"true"`
 }
 
@@ -35,7 +35,7 @@ func main() {
 	var c Config
 	c.Port = os.Getenv("PORT")
 	c.Nasa_key = os.Getenv("NASA_KEY")
-	validator.Validate(&c)
+	structval.Validate(&c)
 
 	router := gin.New()
 	router.Use(gin.Logger())
