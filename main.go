@@ -1,43 +1,20 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"github.com/gin-gonic/gin"
 	"encoding/json"
-	// "fmt"
+	//"fmt"
 	"io/ioutil"
 	"strconv"
 	"time"
+	"liteByte/neo-backend/validator"
 )
 
-func main() {
-
-	port := os.Getenv("PORT")
-
-	if port == "" {
-		log.Fatal("$PORT must be set")
-	}
-
-	router := gin.New()
-	router.Use(gin.Logger())
-
-	router.GET("/neo/feed", func(c *gin.Context) {
-		startDate := c.Query("start_date")
-		endDate := c.Query("end_date")
-		NeoFeedJSONArray := getNeoFeedJSON(startDate, endDate)
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, NeoFeedJSONArray)
-	})
-
-	router.GET("/planetary/apod", func(c *gin.Context) {
-		ApodJSON := getApodJSON()
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, ApodJSON)
-	})
-
-	router.Run(":" + port)
+type Config struct {
+	Port string `default:"3001"`
+	Nasa_key string `required:"true"`
 }
 
 type Apod struct {
@@ -51,6 +28,36 @@ type NeoFeed struct {
 	Dangerous     bool `json:"dangerous"`
 	Velocity      float64 `json:"velocity"`
 	Miss_distance float64 `json:"miss_distance"`
+}
+
+func main() {
+
+	var c Config
+	c.Port = os.Getenv("PORT")
+	c.Nasa_key = os.Getenv("NASA_KEY")
+	validator.Validate(&c)
+
+	router := gin.New()
+	router.Use(gin.Logger())
+
+	router.GET("/neo/feed", getNeoFeed)
+	router.GET("/planetary/apod", getPlanetaryApod)
+
+	router.Run(":" + c.Port)
+}
+
+func getNeoFeed(c *gin.Context) {
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+	NeoFeedJSONArray := getNeoFeedJSON(startDate, endDate)
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.JSON(http.StatusOK, NeoFeedJSONArray)
+}
+
+func getPlanetaryApod(c *gin.Context) {
+	ApodJSON := getApodJSON()
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.JSON(http.StatusOK, ApodJSON)
 }
 
 func getApodJSON() Apod {
@@ -93,6 +100,9 @@ func getNeoFeedJSON(startDate, endDate string) []NeoFeed {
 
 	neoFeedURL := "https://api.nasa.gov/neo/rest/v1/feed?start_date=" + startDate +
 		"&end_date=" + endDate + "&api_key=BvzqGsSJDYhfXLJ94uiaJDF7NLtrKJGdYW42eORT"
+
+	//neoFeedURL := fmt.Sprintf("https://api.nasa.gov/neo/rest/v1/feed?start_date=%s&end_date=%s&api_key=%s",
+	//startDate, endDate, )
 
 	println(neoFeedURL)
 
