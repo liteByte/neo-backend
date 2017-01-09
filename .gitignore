@@ -2,6 +2,4 @@
 .idea
 
 # Go
-bin
-pkg
-src
+neo-backend
