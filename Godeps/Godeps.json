@@ -1,10 +1,7 @@
 {
-	"ImportPath": "bitbucket.org/LiteByte/neo-backend",
-	"GoVersion": "go1.6",
-	"GodepVersion": "v74",
-	"Packages": [
-		"./..."
-	],
+	"ImportPath": "liteByte/neo-backend",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
 	"Deps": [
 		{
 			"ImportPath": "github.com/gin-gonic/gin",
@@ -24,6 +21,10 @@
 		{
 			"ImportPath": "github.com/golang/protobuf/proto",
 			"Rev": "888eb0692c857ec880338addf316bd662d5e630e"
+		},
+		{
+			"ImportPath": "github.com/liteByte/structval",
+			"Rev": "e6af166ead55b8ea19e26afc90bd9fbbd0173dfb"
 		},
 		{
 			"ImportPath": "github.com/manucorporat/sse",
