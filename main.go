@@ -1,15 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
-	"github.com/gin-gonic/gin"
-	"encoding/json"
 	//"fmt"
+	"github.com/liteByte/structval"
 	"io/ioutil"
 	"strconv"
 	"time"
-	"github.com/liteByte/structval"
 )
 
 type Config struct {
@@ -22,12 +22,12 @@ type Apod struct {
 }
 
 type NeoFeed struct {
-	Id            string `json:"id"`
-	Name          string `json:"name"`
-	Size          map[string]float64 `json:"size"`
-	Dangerous     bool `json:"dangerous"`
-	Velocity      float64 `json:"velocity"`
-	Miss_distance float64 `json:"miss_distance"`
+	Id           string             `json:"id"`
+	Name         string             `json:"name"`
+	Size         map[string]float64 `json:"size"`
+	IsDangerous  bool               `json:"isDangerous"`
+	Velocity     float64            `json:"velocity"`
+	MissDistance float64            `json:"missDistance"`
 }
 
 func main() {
@@ -138,7 +138,7 @@ func parseNeoFeedJSON(f feedParser) []NeoFeed {
 				case "name":
 					neoObj.Name = v.(string)
 				case "is_potentially_hazardous_asteroid":
-					neoObj.Dangerous = v.(bool)
+					neoObj.IsDangerous = v.(bool)
 				case "estimated_diameter":
 					size := v.(map[string]interface{})
 					km := size["kilometers"].(map[string]interface{})
@@ -152,10 +152,10 @@ func parseNeoFeedJSON(f feedParser) []NeoFeed {
 					approach_data_v := approach_data[0].(map[string]interface{})
 
 					velocity := approach_data_v["relative_velocity"].(map[string]interface{})
-					miss_distance := approach_data_v["miss_distance"].(map[string]interface{})
+					missDistance := approach_data_v["miss_distance"].(map[string]interface{})
 
 					neoObj.Velocity, _ = strconv.ParseFloat((velocity["kilometers_per_hour"].(string)), 64)
-					neoObj.Miss_distance, _ = strconv.ParseFloat(miss_distance["kilometers"].(string), 64)
+					neoObj.MissDistance, _ = strconv.ParseFloat(missDistance["kilometers"].(string), 64)
 				}
 			}
 			neoFeedArray = append(neoFeedArray, neoObj)
