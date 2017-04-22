@@ -141,11 +141,11 @@ func parseNeoFeedJSON(f feedParser) []NeoFeed {
 					neoObj.IsDangerous = v.(bool)
 				case "estimated_diameter":
 					size := v.(map[string]interface{})
-					km := size["kilometers"].(map[string]interface{})
+					m := size["meters"].(map[string]interface{})
 					neoObj.Size = map[string]float64{
-						"min": km["estimated_diameter_min"].(float64),
-						"max": km["estimated_diameter_max"].(float64),
-						"avg": (km["estimated_diameter_max"].(float64) + km["estimated_diameter_min"].(float64)) / 2,
+						"min": m["estimated_diameter_min"].(float64),
+						"max": m["estimated_diameter_max"].(float64),
+						"avg": (m["estimated_diameter_max"].(float64) + m["estimated_diameter_min"].(float64)) / 2,
 					}
 				case "close_approach_data":
 					approach_data := v.([]interface{})
